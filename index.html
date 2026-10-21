@@ -1692,11 +1692,10 @@
       if (btn) { btn.disabled = false; btn.textContent = 'Log In'; }
 
     } catch (err) {
-      // Server unreachable — fall back to localStorage-based auth
-      console.warn('[login] Server offline, using local auth fallback.');
-      localLogin(email, pass, btn);
-    } finally {
-      // Note: localLogin handles its own finally logic
+      // Server unreachable — cannot authenticate against the database.
+      console.error('[login] Server offline:', err);
+      showToast('Cannot reach the server. Start it (START SERVER.bat) and open the app via http://localhost:3000.', 'error', 5000);
+      if (btn) { btn.disabled = false; btn.textContent = 'Log In'; }
     }
   }
 
@@ -1746,9 +1745,10 @@
       if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
 
     } catch (err) {
-      // Server unreachable — fall back to localStorage-based registration
-      console.warn('[register] Server offline, using local auth fallback.');
-      localRegister(name, email, pass, selectedRole, btn);
+      // Server unreachable — cannot write to the database.
+      console.error('[register] Server offline:', err);
+      showToast('Cannot reach the server. Start it (START SERVER.bat) and open the app via http://localhost:3000.', 'error', 5000);
+      if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
     }
   }
 

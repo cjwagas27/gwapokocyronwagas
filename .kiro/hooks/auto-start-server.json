@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Auto-start DormFinder server",
+      "trigger": "SessionStart",
+      "description": "Starts the DormFinder Python server (python server.py) on port 3000 if it isn't already running, so the SQLite database is reachable from the front-end in every new session.",
+      "action": {
+        "type": "command",
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"d:\\paynder\\deploy\\.kiro\\start-server-bg.ps1\"",
+        "timeout": 30
+      }
+    }
+  ]
+}
