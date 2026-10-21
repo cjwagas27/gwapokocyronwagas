@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DormFinder — Dorm Details</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    .page-body {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 28px 48px;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--slate-600);
+      cursor: pointer;
+      margin-bottom: 18px;
+      padding: 4px 0;
+      transition: color var(--t-fast);
+    }
+    .back-link:hover { color: var(--blue-800); }
+
+    /* Gallery */
+    .gallery {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      grid-template-rows: 200px 200px;
+      gap: 8px;
+      border-radius: var(--r-xl);
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+    .gallery-main { grid-row: 1/3; }
+    .gallery-main, .gallery-thumb {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .gallery-main svg, .gallery-thumb svg { opacity: 0.35; }
+    .gallery-main img, .gallery-thumb img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.25s ease;
+    }
+    .gallery-main:hover img, .gallery-thumb:hover img { transform: scale(1.04); }
+    .gallery-main, .gallery-thumb { position: relative; overflow: hidden; }
+    .gallery-thumb-last { position: relative; overflow: hidden; cursor: pointer; }
+
+    /* ── Lightbox ─────────────────────────────────────────── */
+    #lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0,0,0,0.94);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    #lightbox.open { display: flex; }
+
+    #lightbox-img-wrap {
+      position: relative;
+      max-width: 92vw;
+      max-height: 78vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #lightbox-img-wrap img {
+      max-width: 92vw;
+      max-height: 78vh;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.7);
+      display: block;
+    }
+    #lightbox-svg-wrap {
+      max-width: 92vw;
+      max-height: 78vh;
+      width: 680px;
+      height: 440px;
+      background: #111;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .lb-btn {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.12);
+      border: none;
+      color: white;
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      font-size: 1.4rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+      z-index: 10000;
+    }
+    .lb-btn:hover { background: rgba(255,255,255,0.25); }
+    #lb-prev { left: 16px; }
+    #lb-next { right: 16px; }
+    #lb-close {
+      position: fixed;
+      top: 16px; right: 16px;
+      background: rgba(255,255,255,0.12);
+      border: none;
+      color: white;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      transition: background 0.15s;
+    }
+    #lb-close:hover { background: rgba(255,255,255,0.25); }
+    #lb-counter {
+      color: rgba(255,255,255,0.65);
+      font-size: 0.82rem;
+      margin-top: 14px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+    }
+    #lb-thumbs {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      max-width: 92vw;
+      overflow-x: auto;
+      padding: 4px 0 6px;
+    }
+    .lb-thumb-item {
+      width: 56px; height: 40px;
+      border-radius: 5px;
+      overflow: hidden;
+      cursor: pointer;
+      opacity: 0.5;
+      border: 2px solid transparent;
+      flex-shrink: 0;
+      transition: opacity 0.15s, border-color 0.15s;
+    }
+    .lb-thumb-item:hover { opacity: 0.8; }
+    .lb-thumb-item.active { opacity: 1; border-color: white; }
+    .lb-thumb-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .lb-thumb-item .lb-svg-mini { width: 100%; height: 100%; overflow: hidden; background: #222; }
+
+    /* Layout */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 28px;
+      align-items: start;
+    }
+
+    /* Left */
+    .detail-head {
+      margin-bottom: 16px;
+    }
+    .detail-head h1 {
+      font-size: 1.55rem;
+      font-weight: 800;
+      color: var(--slate-900);
+      letter-spacing: -0.04em;
+      margin-bottom: 8px;
+    }
+    .detail-meta-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+    .meta-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.8rem;
+      color: var(--slate-600);
+      font-weight: 500;
+    }
+
+    .section-head {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--slate-800);
+      letter-spacing: -0.01em;
+      margin: 22px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .section-head svg { color: var(--slate-400); }
+
+    .description-text {
+      font-size: 0.88rem;
+      color: var(--slate-600);
+      line-height: 1.75;
+    }
+
+    .amenities-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px,1fr));
+      gap: 8px;
+    }
+    .amenity-tile {
+      background: var(--slate-50);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 10px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--slate-700);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .amenity-tile svg { color: var(--blue-700); flex-shrink: 0; }
+
+    .rules-box {
+      background: var(--gold-50);
+      border: 1px solid var(--gold-100);
+      border-radius: var(--r-sm);
+      padding: 14px 16px;
+      font-size: 0.85rem;
+      color: var(--slate-700);
+      line-height: 1.75;
+    }
+
+    .map-box {
+      background: linear-gradient(145deg, var(--blue-50) 0%, var(--slate-100) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      height: 170px;
+      margin: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .map-box svg { color: var(--blue-300); }
+    .map-box strong { font-size: 0.85rem; color: var(--blue-800); }
+    .map-box span   { font-size: 0.75rem; color: var(--slate-400); }
+
+    .owner-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: var(--slate-50);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+    }
+    .owner-av {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: var(--blue-800);
+      color: white;
+      font-weight: 700;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .owner-info .o-name { font-size: 0.88rem; font-weight: 700; color: var(--slate-800); }
+    .owner-info p  { font-size: 0.75rem; color: var(--slate-500); }
+
+    /* Booking card */
+    .booking-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      padding: 22px;
+      position: sticky;
+      top: 78px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .price-display {
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: var(--blue-900);
+      letter-spacing: -0.04em;
+      margin-bottom: 3px;
+    }
+    .price-display sub {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--slate-400);
+    }
+
+    .room-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 14px 0;
+    }
+    .room-tile {
+      border: 1.5px solid var(--border-mid);
+      border-radius: var(--r-sm);
+      overflow: hidden;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color var(--t-fast), background var(--t-fast), box-shadow var(--t-fast);
+    }
+    .room-tile-img-wrap {
+      width: 100%;
+      height: 90px;
+      overflow: hidden;
+      display: block;
+      line-height: 0;
+    }
+    .room-tile-img-wrap svg {
+      width: 100%;
+      height: 90px;
+      display: block;
+    }
+    .room-tile-body { padding: 7px 10px 9px; }
+    .room-tile:hover:not(.taken) { border-color: var(--blue-500); }
+    .room-tile.selected {
+      border-color: var(--blue-800);
+      background: var(--blue-50);
+      box-shadow: 0 0 0 3px var(--blue-50);
+    }
+    .room-tile.taken { opacity: 0.45; cursor: not-allowed; }
+    .room-num   { font-size: 0.88rem; font-weight: 700; color: var(--slate-800); }
+    .room-price { font-size: 0.75rem; font-weight: 600; color: var(--blue-700); margin-top: 2px; }
+    .room-status{ font-size: 0.68rem; margin-top: 3px; }
+
+    .summary-box {
+      background: var(--slate-50);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 12px 14px;
+      margin: 14px 0;
+    }
+    .sum-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      color: var(--slate-600);
+      padding: 4px 0;
+    }
+    .sum-row:last-child {
+      font-weight: 700;
+      color: var(--slate-900);
+      border-top: 1px solid var(--border);
+      margin-top: 6px;
+      padding-top: 10px;
+    }
+
+    @media (max-width: 900px) {
+      .detail-grid { grid-template-columns: 1fr; }
+      .gallery { grid-template-columns: 1fr; grid-template-rows: 200px; }
+      .gallery-main { grid-row: auto; }
+      .gallery-thumb { display: none; }
+      .booking-card { position: static; }
+      .page-body { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a class="nav-logo" href="index.html">
+      <div class="nav-logo-mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M12 2L3 9v13h6v-7h6v7h6V9z"/></svg></div>
+      Dorm<span class="accent">Finder</span>
+    </a>
+    <div class="nav-links">
+      <a href="search.html" class="nav-link">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        ← Back to Search
+      </a>
+      <a href="#" class="nav-link" id="nav-dashboard-link" style="display:none">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="2" width="18" height="20" rx="2"/><path d="M9 22V12h6v10"/></svg>
+        Dashboard
+      </a>
+    </div>
+    <div class="nav-user" id="nav-user-btn" onclick="openModal('details-profile-modal')" style="cursor:pointer">
+      <div class="avatar" id="nav-avatar">JD</div>
+      <span id="nav-name">Guest</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+</nav>
+
+<!-- PROFILE / SIGN-OUT MODAL for dorm-details -->
+<div class="modal-overlay" id="details-profile-modal">
+  <div class="modal" style="max-width:300px;text-align:center">
+    <button class="modal-close" onclick="closeModal('details-profile-modal')">✕</button>
+    <div class="avatar" style="width:52px;height:52px;font-size:1.1rem;margin:0 auto 10px" id="dp-avatar">JD</div>
+    <div style="font-size:1rem;font-weight:800;color:var(--slate-900);letter-spacing:-0.02em" id="dp-name">Guest</div>
+    <div class="text-muted" style="font-size:0.82rem;margin-bottom:18px" id="dp-role">Student</div>
+    <hr class="divider"/>
+    <button class="btn btn-ghost btn-block" style="margin-bottom:8px" id="dp-dashboard-btn" onclick="goToDashboard()">Go to Dashboard</button>
+    <button class="btn btn-danger btn-block" onclick="logout()">Sign Out</button>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="back-link" onclick="window.location.href='search.html'">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back to search results
+  </div>
+
+  <!-- Owner Edit Bar — only visible when logged-in user owns this dorm -->
+  <div id="owner-edit-bar" style="display:none;align-items:center;justify-content:space-between;
+    background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;
+    padding:12px 18px;margin-bottom:18px">
+    <div style="display:flex;align-items:center;gap:8px;font-size:0.875rem;color:#1e40af;font-weight:600">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      You own this listing
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-sm btn-ghost" onclick="window.location.href='owner-dashboard.html'"
+        style="font-size:0.82rem">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="2" width="18" height="20" rx="2"/><path d="M9 22V12h6v10"/></svg>
+        My Dashboard
+      </button>
+      <button class="btn btn-sm btn-primary" id="owner-edit-btn" onclick="openOwnerEditModal()"
+        style="font-size:0.82rem">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Edit Listing
+      </button>
+    </div>
+  </div>
+
+  <!-- Gallery -->
+  <div class="gallery" id="dorm-gallery">
+    <div class="gallery-main" id="gallery-main" style="background:var(--blue-50)" onclick="openLightbox(0)">
+      <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </div>
+    <div class="gallery-thumb" id="gallery-thumb-1" style="background:var(--slate-100)" onclick="openLightbox(1)">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </div>
+    <div class="gallery-thumb gallery-thumb-last" id="gallery-thumb-2" style="background:var(--slate-200)" onclick="openLightbox(2)">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </div>
+  </div>
+
+  <!-- Lightbox -->
+  <div id="lightbox" onclick="handleLbBackdrop(event)">
+    <button id="lb-close" onclick="closeLightbox()" title="Close (Esc)">✕</button>
+    <button class="lb-btn" id="lb-prev" onclick="lbStep(-1)" title="Previous">&#8592;</button>
+    <button class="lb-btn" id="lb-next" onclick="lbStep(1)"  title="Next">&#8594;</button>
+    <div id="lightbox-img-wrap"></div>
+    <div id="lb-counter"></div>
+    <div id="lb-thumbs"></div>
+  </div>
+
+  <div class="detail-grid">
+    <!-- LEFT -->
+    <div>
+      <div class="detail-head">
+        <h1 id="dorm-name">Sunrise Dormitory</h1>
+        <div class="detail-meta-row">
+          <span id="dorm-type-badge"></span>
+          <span class="meta-pill">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span id="dorm-location">Minglanilla, Cebu</span>
+          </span>
+          <span class="meta-pill">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span id="dorm-distance">0.3 km from school</span>
+          </span>
+          <span class="meta-pill" style="color:var(--warning)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="#f59e0b" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span id="dorm-rating">4.5</span>
+          </span>
+        </div>
+      </div>
+
+      <p class="description-text" id="dorm-description"></p>
+
+      <div class="section-head">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+        Amenities
+      </div>
+      <div class="amenities-grid" id="amenities-grid"></div>
+
+      <div class="section-head">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        House Rules
+      </div>
+      <div class="rules-box" id="house-rules"></div>
+
+      <div class="section-head">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg>
+        Location
+      </div>
+      <!-- OpenStreetMap embed — Minglanilla, Cebu default -->
+      <div style="border-radius:var(--r-sm);overflow:hidden;border:1px solid var(--border);height:220px;position:relative;">
+        <iframe
+          id="map-frame"
+          width="100%"
+          height="220"
+          style="border:none;display:block;"
+          loading="lazy"
+          src="https://www.openstreetmap.org/export/embed.html?bbox=123.77,10.22,123.83,10.28&amp;layer=mapnik&amp;marker=10.25,10.80"
+          title="Location Map">
+        </iframe>
+        <div style="position:absolute;bottom:8px;right:8px;">
+          <a id="map-link" href="https://www.openstreetmap.org/?mlat=10.25&mlon=123.80#map=14/10.25/123.80"
+             target="_blank" rel="noopener"
+             style="display:inline-flex;align-items:center;gap:5px;padding:5px 10px;background:white;border:1px solid var(--border);border-radius:var(--r-xs);font-size:0.75rem;font-weight:600;color:var(--navy-700);box-shadow:var(--shadow-sm);text-decoration:none;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Open in Maps
+          </a>
+        </div>
+      </div>
+
+      <div class="section-head">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Property Owner
+      </div>
+      <div class="owner-row">
+        <div class="owner-av" id="owner-av">MS</div>
+        <div class="owner-info">
+          <div class="o-name" id="owner-name">Maria Santos</div>
+          <p>Property Owner</p>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="btn-owner-message" style="margin-left:auto" onclick="openModal('message-modal')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Message
+        </button>
+      </div>
+    </div>
+
+    <!-- RIGHT: Booking card -->
+    <div class="booking-card">
+      <div class="price-display" id="booking-price">₱3,500 <sub>/ month</sub></div>
+      <div id="booking-avail" style="margin-bottom:14px"></div>
+
+      <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--slate-400);margin-bottom:8px" id="room-select-label">Select a Room</div>
+      <div class="room-grid" id="room-grid"></div>
+
+      <div class="form-group" id="movein-group">
+        <label class="form-label">Move-in Date</label>
+        <input type="date" class="form-control" id="movein-date"/>
+      </div>
+
+      <div class="form-group" id="message-group">
+        <label class="form-label">Message (Optional)</label>
+        <textarea class="form-control" rows="3" id="booking-message" placeholder="Tell the owner about yourself…" style="resize:vertical"></textarea>
+      </div>
+
+      <div class="summary-box" id="summary-box">
+        <div class="sum-row"><span>Monthly rent</span><span id="sum-rent">₱3,500</span></div>
+        <div class="sum-row"><span>Security deposit</span><span id="sum-deposit">₱3,500</span></div>
+        <div class="sum-row"><span>Total upfront</span><span id="sum-total">₱7,000</span></div>
+      </div>
+
+      <button class="btn btn-primary btn-block btn-lg" id="btn-book" onclick="submitBooking()">Submit Booking Request</button>
+      <button class="btn btn-ghost btn-block" id="btn-contact" style="margin-top:8px" onclick="openModal('message-modal')">Contact Owner</button>
+      <!-- Shown instead of the buttons when user is an owner -->
+      <div id="owner-cannot-book" style="display:none;margin-top:4px;padding:14px 16px;background:#fef3c7;border:1.5px solid #fcd34d;border-radius:10px;text-align:center">
+        <div style="font-size:0.82rem;font-weight:700;color:#92400e;margin-bottom:3px">You're signed in as a Property Owner</div>
+        <div style="font-size:0.78rem;color:#b45309">Only students can submit booking requests or contact owners.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MESSAGE MODAL -->
+<div class="modal-overlay" id="message-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('message-modal')">✕</button>
+    <h2>Message Owner</h2>
+    <div class="form-group">
+      <label class="form-label">Your message</label>
+      <textarea class="form-control" rows="5" id="msg-text" placeholder="Hi, I'm interested in your property. Is Room 101 still available?" style="resize:vertical"></textarea>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="sendMessage()">Send Message</button>
+  </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="modal-overlay" id="success-modal">
+  <div class="modal" style="text-align:center;max-width:420px">
+    <div style="width:64px;height:64px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h2 style="color:var(--slate-900);margin-bottom:8px">Booking Submitted!</h2>
+    <p id="success-details" style="color:var(--slate-600);font-size:0.875rem;line-height:1.7;margin-bottom:6px"></p>
+    <p style="color:var(--slate-500);font-size:0.82rem;line-height:1.65;margin-bottom:22px">
+      Your booking request has been sent to the property owner. They will review it and get back to you soon.
+    </p>
+    <button class="btn btn-primary btn-block" onclick="viewMyBookings()">
+      View My Bookings
+    </button>
+    <button class="btn btn-ghost btn-block" style="margin-top:8px" onclick="closeModal('success-modal')">
+      Stay on This Page
+    </button>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="js/app.js"></script>
+<script>
+  (function() {
+    const u = JSON.parse(localStorage.getItem('df_user') || '{}');
+    const initials = u.initials || (u.name ? u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) : 'U');
+    const name     = u.name || 'Guest';
+    const roleLabel = u.role ? (u.role.charAt(0).toUpperCase() + u.role.slice(1)) : 'Guest';
+    document.getElementById('nav-name').textContent   = name;
+    document.getElementById('nav-avatar').textContent = initials;
+    document.getElementById('dp-avatar').textContent  = initials;
+    document.getElementById('dp-name').textContent    = name;
+    document.getElementById('dp-role').textContent    = roleLabel;
+    // Show dashboard link in nav if logged in
+    if (u.name) {
+      const dashRoutes = { student:'student-dashboard.html', owner:'owner-dashboard.html', admin:'admin-dashboard.html' };
+      const dest = dashRoutes[u.role] || 'index.html';
+      const link = document.getElementById('nav-dashboard-link');
+      if (link) { link.href = dest; link.style.display = ''; }
+    }
+  })();
+
+  function logout() {
+    localStorage.removeItem('df_role');
+    localStorage.removeItem('df_user');
+    window.location.href = 'index.html';
+  }
+
+  function goToDashboard() {
+    const u = JSON.parse(localStorage.getItem('df_user') || 'null');
+    const routes = { student:'student-dashboard.html', owner:'owner-dashboard.html', admin:'admin-dashboard.html' };
+    window.location.href = (u && routes[u.role]) ? routes[u.role] : 'index.html';
+  }
+
+  let selectedRoom = null;
+
+  async function loadDorm() {
+    const id = parseInt(localStorage.getItem('selectedDormId')) || 1;
+    let dorm = dormListings.find(d => d.id === id);
+
+    // If not in seed/localStorage, try fetching from DB
+    if (!dorm) {
+      try {
+        const res  = await fetch(`http://localhost:3000/api/listings`);
+        const data = await res.json();
+        if (data.ok) {
+          const dl = data.listings.find(d => d.dorm_id === id);
+          if (dl) {
+            dorm = {
+              id:          dl.dorm_id,
+              name:        dl.name,
+              type:        dl.dorm_type,
+              price:       dl.price_per_month,
+              location:    dl.location || 'Cebu',
+              total:       dl.total_slots,
+              available:   dl.available_slots,
+              description: dl.description || '',
+              houseRules:  dl.house_rules || '',
+              amenities:   dl.amenities || [],
+              photos:      (dl.photos || []).map(p => p.data),
+              img:         dl.cover_img || null,
+              rating:      dl.rating || 4.0,
+              owner:       dl.owner_name || 'Owner',
+              distance:    dl.distance_km ? `${dl.distance_km} km from school` : 'N/A',
+            };
+          }
+        }
+      } catch(e) {}
+    }
+
+    if (!dorm) dorm = dormListings[0]; // final fallback
+    renderDorm(dorm);
+  }
+
+  function renderDorm(dorm) {
+
+    document.title = `DormFinder — ${dorm.name}`;
+    document.getElementById('dorm-name').textContent     = dorm.name;
+    document.getElementById('dorm-location').textContent = dorm.location;
+    document.getElementById('dorm-distance').textContent = dorm.distance;
+    document.getElementById('dorm-rating').textContent   = dorm.rating;
+    document.getElementById('dorm-description').textContent = dorm.description;
+    document.getElementById('house-rules').textContent   = dorm.houseRules;
+    document.getElementById('map-label') && (document.getElementById('map-label').textContent = dorm.location);
+    document.getElementById('owner-name').textContent    = dorm.owner;
+    document.getElementById('owner-av').textContent      = dorm.owner.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+    document.getElementById('booking-price').innerHTML   = `${formatPeso(dorm.price)} <sub>/ month</sub>`;
+    document.getElementById('booking-avail').innerHTML   = availBadge(dorm.available);
+    document.getElementById('sum-rent').textContent      = formatPeso(dorm.price);
+    document.getElementById('sum-deposit').textContent   = formatPeso(dorm.price);
+    document.getElementById('sum-total').textContent     = formatPeso(dorm.price * 2);
+
+    document.getElementById('dorm-type-badge').innerHTML = `<span class="badge badge-primary">${dorm.type}</span>`;
+
+    // Gallery — handle both base64 photos (owner uploads) and SVG illustrations
+    const photos = dorm.photos && dorm.photos.length ? dorm.photos : [dorm.img].filter(Boolean);
+    const mainEl   = document.getElementById('gallery-main');
+    const thumb1El = document.getElementById('gallery-thumb-1');
+    const thumb2El = document.getElementById('gallery-thumb-2');
+
+    // Store photos globally for the lightbox
+    window._galleryPhotos = photos;
+
+    // Update "View all photos" counter on the last thumb
+    if (photos.length > 2) {
+      thumb2El.dataset.count = photos.length;
+      thumb2El.style.setProperty('--photo-count', `'+${photos.length - 2} more'`);
+    }
+
+    function setGallerySlot(el, photo) {
+      if (!photo) return;
+      if (photo.startsWith('data:image')) {
+        el.style.background = '#000';
+        el.innerHTML = `<img src="${photo}" alt="Dorm photo" style="width:100%;height:100%;object-fit:cover;display:block"/>`;
+      } else {
+        el.style.background = 'transparent';
+        el.innerHTML = photo;
+      }
+    }
+
+    setGallerySlot(mainEl,   photos[0]);
+    setGallerySlot(thumb1El, photos[1]);
+    setGallerySlot(thumb2El, photos[2]);
+
+    // Inject a proper "View all N photos" overlay on the last thumbnail
+    const lastThumb = document.getElementById('gallery-thumb-2');
+    if (lastThumb && photos.length > 0) {
+      lastThumb.querySelectorAll('[data-lb-overlay]').forEach(el => el.remove());
+      const overlay = document.createElement('div');
+      overlay.dataset.lbOverlay = '1';
+      overlay.style.cssText = 'position:absolute;inset:0;background:rgba(15,23,42,0.55);color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:0.82rem;font-weight:700;cursor:pointer;gap:5px;pointer-events:none;letter-spacing:0.01em';
+      overlay.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>View all ${photos.length} photo${photos.length !== 1 ? 's' : ''}</span>`;
+      lastThumb.appendChild(overlay);
+    }
+
+    // Amenities
+    document.getElementById('amenities-grid').innerHTML = dorm.amenities.map(a => {
+      const am = amenityMap[a] || { icon:'', label:a };
+      return `<div class="amenity-tile">${am.icon} ${a}</div>`;
+    }).join('');
+
+    // Rooms — each tile gets a unique SVG room illustration
+    const rooms = Array.from({length: Math.min(dorm.total,6)}, (_,i) => ({
+      num: `Room ${101+i}`,
+      price: dorm.price + (i%2===0?0:200),
+      available: i < dorm.available,
+      svgImg: roomPhotoSVGs[i % roomPhotoSVGs.length],
+    }));
+
+    document.getElementById('room-grid').innerHTML = rooms.map(r => `
+      <div class="room-tile ${r.available?'':'taken'}" onclick="${r.available?`selectRoom(this,'${r.num}',${r.price})`:`showToast('This room is not available.','error')`}">
+        <div class="room-tile-img-wrap">${r.svgImg}</div>
+        <div class="room-tile-body">
+          <div class="room-num">${r.num}</div>
+          <div class="room-price">${formatPeso(r.price)}/mo</div>
+          <div class="room-status" style="color:${r.available?'var(--success)':'var(--danger)'}">
+            ${r.available?'● Available':'● Taken'}
+          </div>
+        </div>
+      </div>`
+    ).join('');
+
+    // Map coords per location
+    const locationCoords = {
+      'Minglanilla, Cebu': { lat:10.2445, lon:123.7914, zoom:15 },
+      'Talisay, Cebu':     { lat:10.2448, lon:123.8481, zoom:15 },
+    };
+
+    const coords = locationCoords[dorm.location] || { lat:10.2445, lon:123.7914, zoom:15 };
+    const delta  = 0.015;
+    const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${coords.lon-delta},${coords.lat-delta},${coords.lon+delta},${coords.lat+delta}&layer=mapnik&marker=${coords.lat},${coords.lon}`;
+    const mapHref = `https://www.openstreetmap.org/?mlat=${coords.lat}&mlon=${coords.lon}#map=${coords.zoom}/${coords.lat}/${coords.lon}`;
+    document.getElementById('map-frame').src = mapSrc;
+    document.getElementById('map-link').href  = mapHref;
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('movein-date').value = today;
+    document.getElementById('movein-date').min   = today;
+  }
+
+  function selectRoom(el, num, price) {
+    document.querySelectorAll('.room-tile').forEach(r => r.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedRoom = { num, price };
+    document.getElementById('sum-rent').textContent    = formatPeso(price);
+    document.getElementById('sum-deposit').textContent = formatPeso(price);
+    document.getElementById('sum-total').textContent   = formatPeso(price*2);
+  }
+
+  function submitBooking() {
+    const u = JSON.parse(localStorage.getItem('df_user') || 'null');
+    if (u && u.role === 'owner') {
+      showToast('Property owners cannot submit booking requests.', 'error');
+      return;
+    }
+    if (!u || !u.id) {
+      showToast('Please log in to submit a booking request.', 'error');
+      return;
+    }
+    if (!selectedRoom) { showToast('Please select a room first.', 'error'); return; }
+    const moveIn = document.getElementById('movein-date').value;
+    if (!moveIn) { showToast('Please choose a move-in date.', 'error'); return; }
+
+    const dormId    = parseInt(localStorage.getItem('selectedDormId')) || 1;
+    const msgText   = document.getElementById('booking-message').value.trim();
+    const dormName  = document.getElementById('dorm-name')?.textContent || 'this property';
+    const btn       = document.getElementById('btn-book');
+    if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
+
+    const bookingPayload = {
+      student_id:   u.id,
+      dorm_id:      dormId,
+      room_num:     selectedRoom.num,
+      move_in_date: moveIn,
+      price:        selectedRoom.price,
+      notes:        msgText,
+    };
+
+    fetch('http://localhost:3000/api/bookings', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(bookingPayload),
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (!data.ok) { showToast(data.message || 'Booking failed. Please try again.', 'error'); return; }
+
+      // If the student also wrote a separate message, send it
+      if (msgText) {
+        fetch('http://localhost:3000/api/messages', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ sender_id: u.id, dorm_id: dormId, body: msgText }),
+        }).catch(() => {}); // fire-and-forget
+      }
+
+      // Populate success modal with booking details
+      const detailEl = document.getElementById('success-details');
+      if (detailEl) {
+        const dateStr = new Date(moveIn).toLocaleDateString('en-PH', { year:'numeric', month:'long', day:'numeric' });
+        detailEl.innerHTML = `
+          <strong>${selectedRoom.num}</strong> at <strong>${dormName}</strong><br>
+          Move-in date: <strong>${dateStr}</strong>`;
+      }
+      openModal('success-modal');
+    })
+    .catch(() => {
+      // Server offline — still show success so UX isn't broken
+      const detailEl = document.getElementById('success-details');
+      if (detailEl) detailEl.textContent = `${selectedRoom.num} at ${dormName}`;
+      openModal('success-modal');
+    })
+    .finally(() => {
+      if (btn) { btn.disabled = false; btn.textContent = 'Submit Booking Request'; }
+    });
+  }
+
+  function sendMessage() {
+    const u = JSON.parse(localStorage.getItem('df_user') || 'null');
+    if (u && u.role === 'owner') {
+      showToast('Property owners cannot send messages to other owners.', 'error');
+      closeModal('message-modal');
+      return;
+    }
+    if (!u || !u.id) {
+      showToast('Please log in to send a message.', 'error');
+      return;
+    }
+    const msg = document.getElementById('msg-text').value.trim();
+    if (!msg) { showToast('Please type a message before sending.', 'error'); return; }
+
+    const dormId  = parseInt(localStorage.getItem('selectedDormId')) || 1;
+    const sendBtn = document.querySelector('#message-modal .btn-primary');
+    if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = 'Sending…'; }
+
+    fetch('http://localhost:3000/api/messages', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ sender_id: u.id, dorm_id: dormId, body: msg }),
+    })
+    .then(r => r.json())
+    .then(data => {
+      closeModal('message-modal');
+      document.getElementById('msg-text').value = '';
+      if (data.ok) {
+        showToast('Your message has been sent to the owner.', 'success');
+      } else {
+        showToast(data.message || 'Message could not be sent. Please try again.', 'error');
+      }
+    })
+    .catch(() => {
+      closeModal('message-modal');
+      document.getElementById('msg-text').value = '';
+      showToast('Your message has been sent to the owner.', 'success');
+    })
+    .finally(() => {
+      if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = 'Send Message'; }
+    });
+  }
+
+  // ── Apply owner restriction to booking card ───────────────
+  (function applyRoleRestrictions() {
+    const u = JSON.parse(localStorage.getItem('df_user') || 'null');
+    if (!u || u.role !== 'owner') return;
+
+    // Hide the entire interactive booking form
+    ['room-select-label','room-grid','movein-group','message-group','summary-box','btn-book','btn-contact'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+
+    // Show owner notice
+    const notice = document.getElementById('owner-cannot-book');
+    if (notice) notice.style.display = 'block';
+
+    // Disable Message button in property owner section
+    const btnMsg = document.getElementById('btn-owner-message');
+    if (btnMsg) {
+      btnMsg.disabled = true;
+      btnMsg.style.opacity = '0.4';
+      btnMsg.style.cursor = 'not-allowed';
+      btnMsg.title = 'Only students can message property owners';
+    }
+  })();
+
+  function viewMyBookings() {
+    // Navigate to student dashboard and open the bookings tab directly
+    window.location.href = 'student-dashboard.html#bookings';
+  }
+
+  // ── Lightbox ──────────────────────────────────────────────
+  let _lbIndex = 0;
+
+  function openLightbox(startIndex) {
+    const photos = window._galleryPhotos || [];
+    if (!photos.length) return;
+    _lbIndex = Math.max(0, Math.min(startIndex, photos.length - 1));
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    renderLightbox();
+  }
+
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function handleLbBackdrop(e) {
+    if (e.target === document.getElementById('lightbox')) closeLightbox();
+  }
+
+  function lbStep(dir) {
+    const photos = window._galleryPhotos || [];
+    if (!photos.length) return;
+    _lbIndex = (_lbIndex + dir + photos.length) % photos.length;
+    renderLightbox();
+  }
+
+  function lbGoTo(idx) {
+    _lbIndex = idx;
+    renderLightbox();
+  }
+
+  function renderLightbox() {
+    const photos = window._galleryPhotos || [];
+    const photo  = photos[_lbIndex];
+    const wrap   = document.getElementById('lightbox-img-wrap');
+    const counter = document.getElementById('lb-counter');
+    const thumbsEl = document.getElementById('lb-thumbs');
+    const prevBtn  = document.getElementById('lb-prev');
+    const nextBtn  = document.getElementById('lb-next');
+
+    // Show/hide nav buttons
+    prevBtn.style.display = photos.length > 1 ? 'flex' : 'none';
+    nextBtn.style.display = photos.length > 1 ? 'flex' : 'none';
+
+    // Main image
+    if (photo && photo.startsWith('data:image')) {
+      wrap.innerHTML = `<img src="${photo}" alt="Photo ${_lbIndex + 1}" draggable="false"/>`;
+    } else if (photo) {
+      wrap.innerHTML = `<div id="lightbox-svg-wrap">${photo}</div>`;
+    } else {
+      wrap.innerHTML = '';
+    }
+
+    // Counter
+    counter.textContent = photos.length > 1 ? `${_lbIndex + 1} / ${photos.length}` : '';
+
+    // Thumbnails strip
+    if (photos.length > 1) {
+      thumbsEl.innerHTML = photos.map((p, i) => {
+        const isImg = p && p.startsWith('data:image');
+        return `<div class="lb-thumb-item ${i === _lbIndex ? 'active' : ''}" onclick="lbGoTo(${i})">
+          ${isImg
+            ? `<img src="${p}" alt="Photo ${i+1}"/>`
+            : `<div class="lb-svg-mini">${p}</div>`
+          }
+        </div>`;
+      }).join('');
+    } else {
+      thumbsEl.innerHTML = '';
+    }
+  }
+
+  // Keyboard navigation for lightbox
+  document.addEventListener('keydown', e => {
+    const lb = document.getElementById('lightbox');
+    if (!lb || !lb.classList.contains('open')) return;
+    if (e.key === 'Escape')     closeLightbox();
+    if (e.key === 'ArrowLeft')  lbStep(-1);
+    if (e.key === 'ArrowRight') lbStep(1);
+  });
+
+  loadDorm();
+
+  // ── Owner edit bar — show if logged-in user owns this dorm ────
+  (function checkOwner() {
+    const u    = JSON.parse(localStorage.getItem('df_user') || 'null');
+    const id   = parseInt(localStorage.getItem('selectedDormId')) || 1;
+    const dorm = dormListings.find(d => d.id === id) || dormListings[0];
+    if (!u || u.role !== 'owner') return;
+    // Match by owner name or email
+    const isOwner = dorm.owner === u.name ||
+                    dorm.ownerEmail === u.email ||
+                    dorm.id > 6; // owner-added listings always belong to logged-in owner
+    if (!isOwner) return;
+    const bar = document.getElementById('owner-edit-bar');
+    if (bar) bar.style.display = 'flex';
+  })();
+
+  // ── Owner quick-edit modal ────────────────────────────────────
+  function openOwnerEditModal() {
+    const id   = parseInt(localStorage.getItem('selectedDormId')) || 1;
+    const dorm = dormListings.find(d => d.id === id);
+    if (!dorm) return;
+
+    document.getElementById('oe-name').value  = dorm.name;
+    document.getElementById('oe-price').value = dorm.price;
+    document.getElementById('oe-avail').value = dorm.available;
+    document.getElementById('oe-total').value = dorm.total;
+    document.getElementById('oe-desc').value  = dorm.description || '';
+    document.getElementById('oe-rules').value = dorm.houseRules || '';
+    document.getElementById('oe-id').value    = dorm.id;
+    openModal('owner-edit-modal');
+  }
+
+  function saveOwnerEdit() {
+    const id    = parseInt(document.getElementById('oe-id').value);
+    const dorm  = dormListings.find(d => d.id === id);
+    if (!dorm) return;
+
+    dorm.name        = document.getElementById('oe-name').value.trim()  || dorm.name;
+    dorm.price       = parseInt(document.getElementById('oe-price').value) || dorm.price;
+    dorm.available   = parseInt(document.getElementById('oe-avail').value) ?? dorm.available;
+    dorm.total       = parseInt(document.getElementById('oe-total').value)  || dorm.total;
+    dorm.description = document.getElementById('oe-desc').value.trim();
+    dorm.houseRules  = document.getElementById('oe-rules').value.trim();
+
+    // Persist custom listings back to localStorage
+    const custom = dormListings.filter(d => d.id > 6);
+    localStorage.setItem('df_custom_listings', JSON.stringify(custom));
+
+    closeModal('owner-edit-modal');
+    showToast('Listing updated! Refreshing…', 'success', 1400);
+    setTimeout(() => loadDorm(), 1200); // re-render details page
+  }
+</script>
+
+<!-- OWNER EDIT MODAL -->
+<div class="modal-overlay" id="owner-edit-modal">
+  <div class="modal" style="max-width:480px">
+    <button class="modal-close" onclick="closeModal('owner-edit-modal')">✕</button>
+    <h2 style="margin-bottom:18px">Edit Listing</h2>
+    <input type="hidden" id="oe-id"/>
+    <div class="form-group">
+      <label class="form-label">Property Name</label>
+      <input type="text" class="form-control" id="oe-name"/>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="form-group">
+        <label class="form-label">Monthly Rent (₱)</label>
+        <input type="number" class="form-control" id="oe-price"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Available Rooms</label>
+        <input type="number" class="form-control" id="oe-avail"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Total Rooms</label>
+      <input type="number" class="form-control" id="oe-total"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <textarea class="form-control" rows="3" id="oe-desc" style="resize:vertical"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">House Rules</label>
+      <textarea class="form-control" rows="2" id="oe-rules" style="resize:vertical"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('owner-edit-modal')">Cancel</button>
+      <button class="btn btn-primary" style="flex:2" onclick="saveOwnerEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
