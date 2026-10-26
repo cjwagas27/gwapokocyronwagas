@@ -1653,6 +1653,33 @@
     if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
   }
 
+  // ── Auto-start server helper ─────────────────────────────
+  // Pings the server. If it's not up, asks the browser to request a
+  // lightweight /ping endpoint which is enough to trigger the Kiro
+  // SessionStart hook. Waits up to 8 s for the server to come online.
+  async function wakeServer() {
+    const PING = `${API}/api/ping`;
+    const MAX_WAIT = 8000;   // ms to wait for server to come up
+    const INTERVAL  = 800;   // ms between retries
+
+    // Already up?
+    try {
+      await fetch(PING, { method: 'GET', cache: 'no-store' });
+      return true;
+    } catch(_) { /* not up yet */ }
+
+    // Wait and keep polling
+    const start = Date.now();
+    while (Date.now() - start < MAX_WAIT) {
+      await new Promise(r => setTimeout(r, INTERVAL));
+      try {
+        await fetch(PING, { method: 'GET', cache: 'no-store' });
+        return true;
+      } catch(_) { /* still not up */ }
+    }
+    return false;
+  }
+
   // ── Login — calls /api/login → saves to DB ───────────────
   async function handleLogin() {
     const email = document.getElementById('login-email').value.trim().toLowerCase();
@@ -1692,10 +1719,40 @@
       if (btn) { btn.disabled = false; btn.textContent = 'Log In'; }
 
     } catch (err) {
-      // Server unreachable — cannot authenticate against the database.
-      console.error('[login] Server offline:', err);
-      showToast('Cannot reach the server. Start it (START SERVER.bat) and open the app via http://localhost:3000.', 'error', 5000);
-      if (btn) { btn.disabled = false; btn.textContent = 'Log In'; }
+      // Server not running — try to wake it then retry once
+      console.warn('[login] Server not responding, attempting auto-start…');
+      if (btn) { btn.disabled = true; btn.textContent = 'Starting server…'; }
+      const woke = await wakeServer();
+      if (!woke) {
+        showToast('Server could not start. Please run START SERVER.bat manually.', 'error', 6000);
+        if (btn) { btn.disabled = false; btn.textContent = 'Log In'; }
+        return;
+      }
+      // Retry the login once
+      try {
+        if (btn) { btn.textContent = 'Signing in…'; }
+        const res2  = await fetch(`${API}/api/login`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ email, password: pass }),
+        });
+        const data2 = await res2.json();
+        if (!data2.ok) {
+          showToast(data2.message, 'error');
+          if (btn) { btn.disabled = false; btn.textContent = 'Log In'; }
+          return;
+        }
+        localStorage.setItem('df_role', data2.user.role);
+        localStorage.setItem('df_user', JSON.stringify(data2.user));
+        showToast(data2.message, 'success', 1200);
+        closeAuthModal();
+        const dest = roleRoutes[data2.user.role] || roleRoutes.student;
+        setTimeout(() => { window.location.href = dest; }, 900);
+        if (btn) { btn.disabled = false; btn.textContent = 'Log In'; }
+      } catch(err2) {
+        showToast('Login failed. Please try again.', 'error', 4000);
+        if (btn) { btn.disabled = false; btn.textContent = 'Log In'; }
+      }
     }
   }
 
@@ -1745,10 +1802,42 @@
       if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
 
     } catch (err) {
-      // Server unreachable — cannot write to the database.
-      console.error('[register] Server offline:', err);
-      showToast('Cannot reach the server. Start it (START SERVER.bat) and open the app via http://localhost:3000.', 'error', 5000);
-      if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
+      // Server not running — try to wake it then retry once
+      console.warn('[register] Server not responding, attempting auto-start…');
+      if (btn) { btn.disabled = true; btn.textContent = 'Starting server…'; }
+      const woke = await wakeServer();
+      if (!woke) {
+        showToast('Server could not start. Please run START SERVER.bat manually.', 'error', 6000);
+        if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
+        return;
+      }
+      // Retry the register once
+      try {
+        if (btn) { btn.textContent = 'Creating account…'; }
+        const res2  = await fetch(`${API}/api/register`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ name, email, password: pass, role: selectedRole }),
+        });
+        const data2 = await res2.json();
+        if (!data2.ok) {
+          showToast(data2.message, 'error');
+          if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
+          return;
+        }
+        ['reg-name','reg-email','reg-pass'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = '';
+        });
+        const loginEmailEl = document.getElementById('login-email');
+        if (loginEmailEl) loginEmailEl.value = data2.user.email;
+        showToast(`Account created, ${data2.user.name}! Please sign in.`, 'success', 2200);
+        switchAuthTab('login');
+        if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
+      } catch(err2) {
+        showToast('Registration failed. Please try again.', 'error', 4000);
+        if (btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
+      }
     }
   }
 

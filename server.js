@@ -28,6 +28,9 @@ function initials(name) {
   return name.trim().split(/\s+/).map(w => w[0]).join('').toUpperCase().slice(0, 2);
 }
 
+// ── Ping — used by front-end to check if server is alive ─────
+app.get('/api/ping', (_req, res) => res.json({ ok: true, message: 'pong' }));
+
 // ─────────────────────────────────────────────────────────────
 //  POST /api/register
 //  Body: { name, email, password, role }

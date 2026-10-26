@@ -79,7 +79,9 @@ class DormHandler(SimpleHTTPRequestHandler):
         parsed = urlparse(self.path)
         path   = parsed.path
 
-        if path == "/api/users":
+        if path == "/api/ping":
+            json_response(self, 200, {"ok": True, "message": "pong"})
+        elif path == "/api/users":
             self._handle_users()
         elif path == "/api/listings":
             self._handle_get_listings(parsed)
