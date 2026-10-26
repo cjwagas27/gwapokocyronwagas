@@ -8,492 +8,372 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link rel="stylesheet" href="css/style.css"/>
   <style>
-    /* ── Dark admin theme ─────────────────────────────────── */
-    body { background:#0f1117; color:#e2e8f0; font-family:var(--font); }
+    /* Only admin-specific extras — everything else uses shared style.css */
 
-    .admin-layout { display:grid; grid-template-columns:220px 1fr; min-height:100vh; }
-
-    /* Sidebar */
-    .admin-sidebar {
-      background:#1a1d2e;
-      border-right:1px solid rgba(255,255,255,0.07);
-      display:flex; flex-direction:column;
-      padding:20px 0;
-      position:fixed; top:0; left:0; bottom:0; width:220px; z-index:50;
-    }
-    .admin-logo {
-      display:flex; align-items:center; gap:9px;
-      padding:0 20px 20px;
-      border-bottom:1px solid rgba(255,255,255,0.07);
-      margin-bottom:16px;
-      font-size:1.15rem; font-weight:800; color:white; text-decoration:none;
-      letter-spacing:-0.03em;
-    }
-    .admin-logo .mark {
-      width:36px; height:36px; border-radius:9px;
-      background:linear-gradient(135deg,#f59e0b,#d97706);
-      display:flex; align-items:center; justify-content:center;
-      flex-shrink:0;
-      box-shadow: 0 2px 8px rgba(245,158,11,0.35);
-    }
-    .admin-logo .gold { color:#fbbf24; }
-    .admin-panel-badge {
-      font-size:0.6rem; font-weight:800;
-      background:rgba(245,158,11,0.22);
-      border:1px solid rgba(245,158,11,0.35);
-      color:#fbbf24;
-      padding:2px 8px; border-radius:100px;
-      letter-spacing:0.06em; margin-top:3px;
-      display:inline-block;
-    }
-
-    .admin-nav-label {
-      font-size:0.67rem; font-weight:700; text-transform:uppercase;
-      letter-spacing:0.1em; color:rgba(255,255,255,0.3);
-      padding:0 20px 6px;
-    }
-    .admin-nav-link {
-      display:flex; align-items:center; gap:10px;
-      padding:10px 18px;
-      font-size:0.875rem; font-weight:500;
-      color:rgba(255,255,255,0.5);
-      cursor:pointer;
-      transition:background 0.15s, color 0.15s;
-      border-left:3px solid transparent;
-      margin:1px 0;
-    }
-    .admin-nav-link:hover { background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.85); }
-    .admin-nav-link.active {
-      background:rgba(180,28,28,0.18);
-      color:white;
-      border-left-color:#ef4444;
-      font-weight:600;
-    }
-    .admin-nav-link svg { flex-shrink:0; opacity:0.7; }
-    .admin-nav-link.active svg { opacity:1; }
-    .badge-count {
-      margin-left:auto;
-      background:#ef4444;
-      color:white;
-      font-size:0.68rem;
-      font-weight:700;
-      padding:1px 6px;
-      border-radius:100px;
-    }
-    .admin-logout {
-      margin-top:auto;
-      padding:0 12px 8px;
-    }
-    .admin-logout button {
-      width:100%;
-      padding:9px 14px;
-      background:rgba(239,68,68,0.12);
-      border:1px solid rgba(239,68,68,0.25);
-      border-radius:8px;
-      color:#f87171;
-      font-size:0.85rem;
-      font-weight:600;
-      cursor:pointer;
-      display:flex; align-items:center; gap:8px;
-      font-family:var(--font);
-      transition:background 0.15s;
-    }
-    .admin-logout button:hover { background:rgba(239,68,68,0.22); }
-
-    /* Top bar */
-    .admin-topbar {
-      margin-left:220px;
-      background:#1a1d2e;
-      border-bottom:1px solid rgba(255,255,255,0.07);
-      padding:0 28px;
-      height:58px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      position:sticky; top:0; z-index:40;
-    }
-    .admin-breadcrumb {
-      display:flex; align-items:center; gap:8px;
-      font-size:0.85rem; color:rgba(255,255,255,0.45);
-    }
-    .admin-breadcrumb .current { color:white; font-weight:600; }
-    .admin-topbar-right {
-      display:flex; align-items:center; gap:10px;
-    }
-    .admin-role-badge {
-      padding:4px 10px;
-      background:rgba(239,68,68,0.15);
-      border:1px solid rgba(239,68,68,0.3);
-      border-radius:100px;
-      font-size:0.72rem;
-      font-weight:700;
-      color:#f87171;
-      letter-spacing:0.05em;
-    }
-    .admin-user-pill {
-      display:flex; align-items:center; gap:8px;
-      padding:5px 12px 5px 6px;
-      background:rgba(255,255,255,0.06);
-      border:1px solid rgba(255,255,255,0.10);
-      border-radius:100px;
-      cursor:pointer;
-    }
-    .admin-user-pill .av {
-      width:28px; height:28px;
-      border-radius:50%;
-      background:var(--navy-500);
-      color:white; font-weight:700; font-size:0.72rem;
-      display:flex; align-items:center; justify-content:center;
-    }
-    .admin-user-pill span { font-size:0.82rem; font-weight:600; color:rgba(255,255,255,0.8); }
-    .btn-logout-top {
-      padding:6px 14px;
-      background:#ef4444;
-      border:none; border-radius:7px;
-      color:white; font-size:0.82rem; font-weight:700;
-      cursor:pointer; font-family:var(--font);
-      transition:background 0.15s;
-    }
-    .btn-logout-top:hover { background:#dc2626; }
-
-    /* Main */
-    .admin-main {
-      margin-left:220px;
-      padding:28px;
-      min-height:calc(100vh - 58px);
-      margin-top:58px;
-    }
-
-    /* Stat cards */
-    .admin-stats {
-      display:grid;
-      grid-template-columns:repeat(4,1fr);
-      gap:16px;
-      margin-bottom:28px;
-    }
-    .admin-stat {
-      background:#1a1d2e;
-      border:1px solid rgba(255,255,255,0.07);
-      border-radius:12px;
-      padding:20px 22px;
-      position:relative;
-      overflow:hidden;
-    }
-    .admin-stat::before {
-      content:'';
-      position:absolute;
-      left:0; top:0; bottom:0;
-      width:3px;
-      border-radius:3px 0 0 3px;
-    }
-    .admin-stat.s-blue::before   { background:#60a5fa; }
-    .admin-stat.s-yellow::before { background:#fbbf24; }
-    .admin-stat.s-green::before  { background:#4ade80; }
-    .admin-stat.s-purple::before { background:#a78bfa; }
-    .admin-stat-label {
-      font-size:0.68rem; font-weight:700;
-      text-transform:uppercase; letter-spacing:0.1em;
-      color:rgba(255,255,255,0.38);
-      margin-bottom:10px;
-    }
-    .admin-stat-val {
-      font-size:2.4rem; font-weight:800;
-      line-height:1; margin-bottom:6px;
-      letter-spacing:-0.04em;
-    }
-    .admin-stat-val.blue   { color:#60a5fa; }
-    .admin-stat-val.green  { color:#4ade80; }
-    .admin-stat-val.yellow { color:#fbbf24; }
-    .admin-stat-val.purple { color:#a78bfa; }
-    .admin-stat-sub { font-size:0.78rem; color:rgba(255,255,255,0.35); }
-
-    /* Dark card */
-    .admin-card {
-      background:#1a1d2e;
-      border:1px solid rgba(255,255,255,0.07);
-      border-radius:12px;
-      overflow:hidden;
-      margin-bottom:20px;
-    }
-    .admin-card-header {
-      padding:14px 18px;
-      border-bottom:1px solid rgba(255,255,255,0.07);
-      display:flex; align-items:center; justify-content:space-between;
-    }
-    .admin-card-title {
-      font-size:0.9rem; font-weight:700; color:white;
-    }
-    .admin-card-link {
-      font-size:0.78rem; color:#60a5fa; cursor:pointer; font-weight:600;
-    }
-    .admin-card-link:hover { color:white; }
-
-    /* Dark table */
-    .admin-table { width:100%; border-collapse:collapse; }
-    .admin-table th {
-      padding:10px 14px;
-      font-size:0.72rem; font-weight:700; text-transform:uppercase;
-      letter-spacing:0.07em; color:rgba(255,255,255,0.35);
-      text-align:left; border-bottom:1px solid rgba(255,255,255,0.07);
-    }
-    .admin-table td {
-      padding:11px 14px;
-      font-size:0.855rem; color:rgba(255,255,255,0.75);
-      border-bottom:1px solid rgba(255,255,255,0.05);
-      vertical-align:middle;
-    }
-    .admin-table tr:last-child td { border-bottom:none; }
-    .admin-table tr:hover td { background:rgba(255,255,255,0.03); }
-
-    /* Role badge */
+    /* Role badges inside tables */
     .role-badge {
-      display:inline-block;
-      padding:2px 9px;
-      border-radius:4px;
-      font-size:0.7rem; font-weight:800;
-      letter-spacing:0.05em;
-      text-transform:uppercase;
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: var(--r-xs);
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
-    .role-badge.owner   { background:#d97706; color:white; }
-    .role-badge.student { background:#2563eb; color:white; }
-    .role-badge.renter  { background:#7c3aed; color:white; }
-    .role-badge.admin   { background:#059669; color:white; }
+    .role-badge.owner   { background: var(--gold-100);    color: var(--gold-600); }
+    .role-badge.student { background: var(--navy-50);     color: var(--navy-700); }
+    .role-badge.renter  { background: #ede9fe;            color: #5b21b6; }
+    .role-badge.admin   { background: var(--success-light); color: var(--success); }
 
-    /* Type badge */
+    /* Type badges */
     .type-badge {
-      display:inline-block;
-      padding:3px 9px;
-      border-radius:4px;
-      font-size:0.7rem; font-weight:800;
-      letter-spacing:0.04em;
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: var(--r-xs);
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
-    .type-badge.dormitory    { background:#2563eb; color:white; }
-    .type-badge.boarding     { background:#d97706; color:white; }
-    .type-badge.apartment    { background:#059669; color:white; }
+    .type-badge.dormitory { background: var(--navy-50);     color: var(--navy-700); }
+    .type-badge.boarding  { background: var(--gold-100);    color: var(--gold-600); }
+    .type-badge.apartment { background: var(--success-light); color: var(--success); }
+
+    /* Admin panel badge in sidebar */
+    .admin-panel-badge {
+      display: inline-block;
+      font-size: 0.58rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(245,158,11,0.18);
+      border: 1px solid rgba(245,158,11,0.32);
+      color: var(--gold-400);
+      padding: 2px 7px;
+      border-radius: 100px;
+    }
+
+    /* Stat cards for admin (uses shared stat-card but needs 4-col grid) */
+    .admin-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 1100px) { .admin-stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px)  { .admin-stats-grid { grid-template-columns: 1fr; } }
+
+    /* Two-column overview grid */
+    .overview-two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 960px) { .overview-two-col { grid-template-columns: 1fr; } }
+
+    /* Search input in page header */
+    .admin-search {
+      padding: 8px 14px;
+      background: var(--white);
+      border: 1.5px solid var(--border-mid);
+      border-radius: var(--r-sm);
+      color: var(--slate-800);
+      font-size: 0.85rem;
+      font-family: var(--font);
+      outline: none;
+      width: 240px;
+      transition: border-color var(--t-fast), box-shadow var(--t-fast);
+    }
+    .admin-search::placeholder { color: var(--slate-400); }
+    .admin-search:focus {
+      border-color: var(--navy-500);
+      box-shadow: var(--focus-ring);
+    }
 
     /* Action buttons */
-    .btn-admin-view {
-      padding:4px 10px;
-      background:rgba(99,102,241,0.15);
-      border:1px solid rgba(99,102,241,0.3);
-      border-radius:5px; color:#818cf8;
-      font-size:0.75rem; font-weight:600;
-      cursor:pointer; font-family:var(--font);
-      transition:background 0.15s;
+    .btn-tbl-view {
+      padding: 4px 11px;
+      background: var(--navy-50);
+      border: 1px solid var(--navy-100);
+      border-radius: var(--r-xs);
+      color: var(--navy-700);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: background var(--t-fast);
+      white-space: nowrap;
     }
-    .btn-admin-view:hover { background:rgba(99,102,241,0.28); }
-    .btn-admin-delete {
-      padding:4px 10px;
-      background:rgba(239,68,68,0.12);
-      border:1px solid rgba(239,68,68,0.25);
-      border-radius:5px; color:#f87171;
-      font-size:0.75rem; font-weight:600;
-      cursor:pointer; font-family:var(--font);
-      transition:background 0.15s;
+    .btn-tbl-view:hover { background: var(--navy-100); }
+
+    .btn-tbl-delete {
+      padding: 4px 11px;
+      background: var(--danger-light);
+      border: 1px solid #fecaca;
+      border-radius: var(--r-xs);
+      color: var(--danger);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: background var(--t-fast);
+      white-space: nowrap;
     }
-    .btn-admin-delete:hover { background:rgba(239,68,68,0.25); }
-    .protected-label { font-size:0.75rem; color:rgba(255,255,255,0.3); font-style:italic; }
+    .btn-tbl-delete:hover { background: #fecaca; }
 
-    /* Search bar */
-    .admin-search {
-      padding:8px 13px;
-      background:rgba(255,255,255,0.06);
-      border:1px solid rgba(255,255,255,0.12);
-      border-radius:8px;
-      color:white;
-      font-size:0.85rem;
-      font-family:var(--font);
-      outline:none;
-      width:220px;
+    .protected-label {
+      font-size: 0.75rem;
+      color: var(--slate-400);
+      font-style: italic;
     }
-    .admin-search::placeholder { color:rgba(255,255,255,0.3); }
-    .admin-search:focus { border-color:rgba(99,102,241,0.5); }
 
-    /* Page header */
-    .admin-page-header {
-      display:flex; align-items:center; justify-content:space-between;
-      margin-bottom:18px;
+    /* Empty / loading rows */
+    .empty-row td {
+      text-align: center;
+      padding: 36px;
+      color: var(--slate-400);
+      font-size: 0.875rem;
     }
-    .admin-page-title {
-      font-size:1.25rem; font-weight:800; color:white; letter-spacing:-0.03em;
-    }
-    .admin-page-sub { font-size:0.82rem; color:rgba(255,255,255,0.4); margin-top:2px; }
-
-    /* Tab panels */
-    .admin-panel { display:none; }
-    .admin-panel.active { display:block; }
-
-    /* Overview grid */
-    .overview-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
-
-    /* Spinner */
-    .loading-row td { text-align:center; padding:32px; color:rgba(255,255,255,0.3); font-size:0.875rem; }
   </style>
 </head>
 <body>
 
-<div class="admin-layout">
-  <!-- SIDEBAR -->
-  <aside class="admin-sidebar">
-    <a class="admin-logo" href="index.html">
-      <div class="mark">
+<!-- ── NAVBAR (same as student/owner) ─────────────────────── -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a class="nav-logo" href="index.html">
+      <div class="nav-logo-mark">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M12 2L3 9v13h6v-7h6v7h6V9z"/></svg>
       </div>
-      <div>
-        <div style="font-size:1.1rem">Dorm<span class="gold">Finder</span></div>
-        <div class="admin-panel-badge">⚡ ADMIN PANEL</div>
-      </div>
+      Dorm<span class="accent">Finder</span>
     </a>
 
-    <div class="admin-nav-label">Management</div>
-    <div class="admin-nav-link active" id="sl-overview" onclick="switchTab('overview')">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Home
+      </a>
+      <a href="admin-dashboard.html" class="nav-link active">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Dashboard
+      </a>
+    </div>
+
+    <div class="nav-user" onclick="openModal('admin-profile-modal')">
+      <div class="avatar" id="nav-avatar">AD</div>
+      <span id="nav-name">Admin User</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+</nav>
+
+<!-- ── DASHBOARD LAYOUT (same as student/owner) ────────────── -->
+<div class="dashboard-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-label">Admin</div>
+
+    <div class="sidebar-link active" id="sl-overview" onclick="switchTab('overview')">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
       Overview
     </div>
-    <div class="admin-nav-link" id="sl-users" onclick="switchTab('users')">
+
+    <div class="sidebar-link" id="sl-users" onclick="switchTab('users')">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       Manage Users
     </div>
-    <div class="admin-nav-link" id="sl-listings" onclick="switchTab('listings')">
+
+    <div class="sidebar-link" id="sl-listings" onclick="switchTab('listings')">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       Manage Listings
-      <span class="badge-count" id="pending-badge" style="display:none">0</span>
+      <span class="sidebar-badge" id="listings-badge" style="display:none">0</span>
     </div>
 
-    <div class="admin-logout">
-      <button onclick="logout()">
+    <div style="margin-top:auto">
+      <div class="sidebar-link" onclick="logout()">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Logout
-      </button>
+        Sign Out
+      </div>
     </div>
   </aside>
 
-  <!-- TOP BAR -->
-  <header class="admin-topbar">
-    <div class="admin-breadcrumb">
-      <span>Admin Panel</span>
-      <span style="color:rgba(255,255,255,0.2)">›</span>
-      <span class="current" id="breadcrumb-current">Overview</span>
-    </div>
-    <div class="admin-topbar-right">
-      <span class="admin-role-badge">⚡ ADMIN</span>
-      <div class="admin-user-pill" onclick="openModal('admin-profile-modal')">
-        <div class="av" id="nav-avatar">AD</div>
-        <span id="nav-name">Admin</span>
-      </div>
-      <button class="btn-logout-top" onclick="logout()">Logout</button>
-    </div>
-  </header>
-
   <!-- MAIN CONTENT -->
-  <main class="admin-main">
+  <main class="main-content">
 
-    <!-- OVERVIEW TAB -->
-    <div class="admin-panel active" id="panel-overview">
-      <!-- Stats -->
-      <div class="admin-stats">
-        <div class="admin-stat s-blue">
-          <div class="admin-stat-label">Total Renters</div>
-          <div class="admin-stat-val blue" id="stat-renters">—</div>
-          <div class="admin-stat-sub">registered students</div>
+    <!-- ── OVERVIEW TAB ───────────────────────────────────── -->
+    <div class="tab-panel active" id="panel-overview">
+
+      <div class="page-header">
+        <h1>Overview</h1>
+        <p>Summary of all users and listings on DormFinder.</p>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="admin-stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon blue">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="stat-info">
+            <h3 id="stat-renters">—</h3>
+            <p>Total Students</p>
+          </div>
         </div>
-        <div class="admin-stat s-yellow">
-          <div class="admin-stat-label">Property Owners</div>
-          <div class="admin-stat-val yellow" id="stat-owners">—</div>
-          <div class="admin-stat-sub">registered owners</div>
+        <div class="stat-card">
+          <div class="stat-icon yellow">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="2" width="18" height="20" rx="2"/><path d="M9 22V12h6v10"/></svg>
+          </div>
+          <div class="stat-info">
+            <h3 id="stat-owners">—</h3>
+            <p>Property Owners</p>
+          </div>
         </div>
-        <div class="admin-stat s-green">
-          <div class="admin-stat-label">Total Listings</div>
-          <div class="admin-stat-val green" id="stat-listings">—</div>
-          <div class="admin-stat-sub">active properties</div>
+        <div class="stat-card">
+          <div class="stat-icon green">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div class="stat-info">
+            <h3 id="stat-listings">—</h3>
+            <p>Total Listings</p>
+          </div>
         </div>
-        <div class="admin-stat s-purple">
-          <div class="admin-stat-label">Total Users</div>
-          <div class="admin-stat-val purple" id="stat-users">—</div>
-          <div class="admin-stat-sub">all accounts</div>
+        <div class="stat-card">
+          <div class="stat-icon blue">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="stat-info">
+            <h3 id="stat-users">—</h3>
+            <p>Total Users</p>
+          </div>
         </div>
       </div>
 
-      <div class="overview-grid">
-        <!-- Recent Registrations -->
-        <div class="admin-card">
-          <div class="admin-card-header">
-            <span class="admin-card-title">Recent Registrations</span>
-            <span class="admin-card-link" onclick="switchTab('users')">View all →</span>
+      <!-- Recent registrations + Recent listings side by side -->
+      <div class="overview-two-col">
+
+        <div class="card">
+          <div class="card-header">
+            <span>Recent Registrations</span>
+            <span class="btn btn-ghost btn-sm" style="font-size:0.78rem;cursor:pointer" onclick="switchTab('users')">View all →</span>
           </div>
-          <table class="admin-table">
-            <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead>
-            <tbody id="recent-users-tbody">
-              <tr class="loading-row"><td colspan="5">Loading…</td></tr>
-            </tbody>
-          </table>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="recent-users-tbody">
+                <tr class="empty-row"><td colspan="5">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <!-- Recent Listings -->
-        <div class="admin-card">
-          <div class="admin-card-header">
-            <span class="admin-card-title">Recent Listings</span>
-            <span class="admin-card-link" onclick="switchTab('listings')">View all →</span>
+        <div class="card">
+          <div class="card-header">
+            <span>Recent Listings</span>
+            <span class="btn btn-ghost btn-sm" style="font-size:0.78rem;cursor:pointer" onclick="switchTab('listings')">View all →</span>
           </div>
-          <table class="admin-table">
-            <thead><tr><th>#</th><th>Title</th><th>Type</th><th>Owner</th><th>Price</th><th>Actions</th></tr></thead>
-            <tbody id="recent-listings-tbody">
-              <tr class="loading-row"><td colspan="6">Loading…</td></tr>
-            </tbody>
-          </table>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Title</th>
+                  <th>Type</th>
+                  <th>Owner</th>
+                  <th>Price</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="recent-listings-tbody">
+                <tr class="empty-row"><td colspan="6">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
+
       </div>
-    </div>
+    </div><!-- /overview -->
 
-    <!-- USERS TAB -->
-    <div class="admin-panel" id="panel-users">
-      <div class="admin-page-header">
+    <!-- ── MANAGE USERS TAB ───────────────────────────────── -->
+    <div class="tab-panel" id="panel-users">
+      <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
         <div>
-          <div class="admin-page-title">All Users <span id="users-count" style="font-size:1rem;font-weight:500;color:rgba(255,255,255,0.4)"></span></div>
-          <div class="admin-page-sub">Manage student and owner accounts</div>
+          <h1>All Users <span id="users-count" style="font-size:1rem;font-weight:500;color:var(--slate-400)"></span></h1>
+          <p>Manage student and owner accounts.</p>
         </div>
         <input class="admin-search" type="text" id="user-search" placeholder="🔍 Search users…" oninput="renderUsers()"/>
       </div>
-      <div class="admin-card">
-        <table class="admin-table">
-          <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Role</th><th>Contact</th><th>Actions</th></tr></thead>
-          <tbody id="users-tbody">
-            <tr class="loading-row"><td colspan="6">Loading…</td></tr>
-          </tbody>
-        </table>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Contact</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody">
+              <tr class="empty-row"><td colspan="6">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </div><!-- /users -->
 
-    <!-- LISTINGS TAB -->
-    <div class="admin-panel" id="panel-listings">
-      <div class="admin-page-header">
+    <!-- ── MANAGE LISTINGS TAB ───────────────────────────── -->
+    <div class="tab-panel" id="panel-listings">
+      <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
         <div>
-          <div class="admin-page-title">All Listings <span id="listings-count" style="font-size:1rem;font-weight:500;color:rgba(255,255,255,0.4)"></span></div>
-          <div class="admin-page-sub">View and manage all property listings</div>
+          <h1>All Listings <span id="listings-count" style="font-size:1rem;font-weight:500;color:var(--slate-400)"></span></h1>
+          <p>View and manage all property listings.</p>
         </div>
         <input class="admin-search" type="text" id="listing-search" placeholder="🔍 Search listings…" oninput="filterListings()"/>
       </div>
-      <div class="admin-card">
-        <table class="admin-table">
-          <thead><tr><th>#</th><th>Title</th><th>Type</th><th>Owner</th><th>Address</th><th>Price</th><th>Actions</th></tr></thead>
-          <tbody id="listings-tbody">
-            <tr class="loading-row"><td colspan="7">Loading…</td></tr>
-          </tbody>
-        </table>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Owner</th>
+                <th>Address</th>
+                <th>Price</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="listings-tbody">
+              <tr class="empty-row"><td colspan="7">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </div><!-- /listings -->
 
   </main>
 </div>
 
 <!-- PROFILE MODAL -->
 <div class="modal-overlay" id="admin-profile-modal">
-  <div class="modal" style="max-width:300px;text-align:center;background:#1a1d2e;border:1px solid rgba(255,255,255,0.1)">
-    <button class="modal-close" onclick="closeModal('admin-profile-modal')" style="color:rgba(255,255,255,0.5)">✕</button>
-    <div class="avatar red" style="width:52px;height:52px;font-size:1.1rem;margin:0 auto 10px" id="profile-av">AD</div>
-    <div style="font-size:1rem;font-weight:800;color:white" id="profile-nm">Admin User</div>
-    <div style="font-size:0.82rem;color:rgba(255,255,255,0.4);margin-bottom:18px">System Administrator</div>
-    <hr style="border:none;border-top:1px solid rgba(255,255,255,0.08);margin-bottom:14px"/>
+  <div class="modal" style="max-width:300px;text-align:center">
+    <button class="modal-close" onclick="closeModal('admin-profile-modal')">✕</button>
+    <div class="avatar" style="width:52px;height:52px;font-size:1.1rem;margin:0 auto 10px" id="profile-av">AD</div>
+    <div style="font-size:1rem;font-weight:800;color:var(--slate-900)" id="profile-nm">Admin User</div>
+    <div style="font-size:0.82rem;color:var(--slate-500);margin-bottom:18px">System Administrator</div>
+    <hr style="border:none;border-top:1px solid var(--border);margin-bottom:14px"/>
     <button class="btn btn-danger btn-block" onclick="logout()">Sign Out</button>
   </div>
 </div>
@@ -505,92 +385,82 @@
   let _allUsers    = [];
   let _allListings = [];
 
-  // ── Init user display ─────────────────────────────────────
+  // ── Init user display ───────────────────────────────────
   (function() {
-    const u = JSON.parse(localStorage.getItem('df_user') || '{}');
-    const ini = u.initials || (u.name ? u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) : 'AD');
+    const u   = JSON.parse(localStorage.getItem('df_user') || '{}');
+    const ini = u.initials || (u.name ? u.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2) : 'AD');
     const nm  = u.name || 'Admin User';
-    document.getElementById('nav-avatar').textContent  = ini;
-    document.getElementById('nav-name').textContent    = nm;
-    document.getElementById('profile-av').textContent  = ini;
-    document.getElementById('profile-nm').textContent  = nm;
+    document.getElementById('nav-avatar').textContent = ini;
+    document.getElementById('nav-name').textContent   = nm;
+    document.getElementById('profile-av').textContent = ini;
+    document.getElementById('profile-nm').textContent = nm;
   })();
 
-  // ── Tab switching ─────────────────────────────────────────
-  const TABS = ['overview','users','listings'];
-  const BREADCRUMBS = { overview:'Overview', users:'Manage Users', listings:'Manage Listings' };
+  // ── Tab switching ───────────────────────────────────────
+  const TABS = ['overview', 'users', 'listings'];
 
   function switchTab(name) {
     TABS.forEach(t => {
       document.getElementById(`panel-${t}`).classList.toggle('active', t === name);
       document.getElementById(`sl-${t}`).classList.toggle('active', t === name);
     });
-    document.getElementById('breadcrumb-current').textContent = BREADCRUMBS[name] || name;
     if (name === 'users')    renderUsers();
     if (name === 'listings') renderListings();
   }
 
-  // ── Fetch all data ────────────────────────────────────────
+  // ── Fetch all data ──────────────────────────────────────
   async function fetchAll() {
     try {
-      // Users
-      const ur = await fetch(`${API}/api/users`);
+      const [ur, lr] = await Promise.all([
+        fetch(`${API}/api/users`),
+        fetch(`${API}/api/listings`)
+      ]);
       const ud = await ur.json();
-      if (ud.ok) _allUsers = ud.users;
-
-      // Listings
-      const lr = await fetch(`${API}/api/listings`);
       const ld = await lr.json();
+      if (ud.ok) _allUsers    = ud.users;
       if (ld.ok) _allListings = ld.listings;
-
     } catch(e) {
-      showToast('Server offline — showing cached data.', 'error', 3000);
-      // Fall back to seed data
-      _allUsers    = [];
-      _allListings = dormListings.map(d => ({ dorm_id:d.id, name:d.name, dorm_type:d.type, owner_name:d.owner, location:d.location, price_per_month:d.price }));
+      showToast('Server offline — data unavailable.', 'error', 3000);
     }
     renderStats();
     renderOverview();
   }
 
-  // ── Stats ─────────────────────────────────────────────────
+  // ── Stats ───────────────────────────────────────────────
   function renderStats() {
     const students = _allUsers.filter(u => u.role === 'student').length;
     const owners   = _allUsers.filter(u => u.role === 'owner').length;
-    const total    = _allUsers.length;
-    const listings = _allListings.length;
-
-    document.getElementById('stat-renters').textContent  = _allUsers.length  ? students : '—';
-    document.getElementById('stat-owners').textContent   = _allUsers.length  ? owners   : '—';
-    document.getElementById('stat-listings').textContent = _allListings.length ? listings : dormListings.length;
-    document.getElementById('stat-users').textContent    = _allUsers.length  ? total    : '—';
+    document.getElementById('stat-renters').textContent  = _allUsers.length  ? students          : '—';
+    document.getElementById('stat-owners').textContent   = _allUsers.length  ? owners             : '—';
+    document.getElementById('stat-listings').textContent = _allListings.length ? _allListings.length : '—';
+    document.getElementById('stat-users').textContent    = _allUsers.length  ? _allUsers.length   : '—';
   }
 
-  // ── Overview panels ───────────────────────────────────────
+  // ── Overview ────────────────────────────────────────────
   function renderOverview() {
-    // Recent users (last 5)
     const recentUsers = [..._allUsers].slice(0, 5);
     document.getElementById('recent-users-tbody').innerHTML = recentUsers.length
       ? recentUsers.map(u => `
-        <tr>
-          <td style="color:rgba(255,255,255,0.4);font-size:0.8rem">${u.user_id}</td>
-          <td style="font-weight:600;color:white">${u.first_name} ${u.last_name || ''}</td>
-          <td style="color:rgba(255,255,255,0.5);font-size:0.8rem">${u.email}</td>
-          <td><span class="role-badge ${u.role}">${u.role}</span></td>
-          <td>
-            <button class="btn-admin-delete" onclick="deleteUser(${u.user_id},'${(u.first_name+' '+u.last_name).trim()}')">🗑 Delete</button>
-          </td>
-        </tr>`).join('')
-      : '<tr class="loading-row"><td colspan="5">No users yet.</td></tr>';
+          <tr>
+            <td style="color:var(--slate-400);font-size:0.8rem">${u.user_id}</td>
+            <td style="font-weight:600;color:var(--slate-800)">${u.first_name} ${u.last_name || ''}</td>
+            <td style="color:var(--slate-500);font-size:0.82rem">${u.email}</td>
+            <td><span class="role-badge ${u.role}">${u.role}</span></td>
+            <td>
+              ${u.role === 'admin'
+                ? `<span class="protected-label">Protected</span>`
+                : `<button class="btn-tbl-delete" onclick="deleteUser(${u.user_id},'${(u.first_name+' '+(u.last_name||'')).trim().replace(/'/g,"\\'")}')">🗑 Delete</button>`}
+            </td>
+          </tr>`).join('')
+      : '<tr class="empty-row"><td colspan="5">No users yet.</td></tr>';
 
-    // Recent listings (last 5)
     const recentListings = [..._allListings].slice(0, 5);
     document.getElementById('recent-listings-tbody').innerHTML = recentListings.length
-      ? recentListings.map(d => typeBadgeRow(d, false)).join('')
-      : '<tr class="loading-row"><td colspan="6">No listings yet.</td></tr>';
+      ? recentListings.map(d => listingRow(d, false)).join('')
+      : '<tr class="empty-row"><td colspan="6">No listings yet.</td></tr>';
   }
 
-  // ── Users tab ─────────────────────────────────────────────
+  // ── Users tab ───────────────────────────────────────────
   function renderUsers() {
     const q    = (document.getElementById('user-search')?.value || '').toLowerCase();
     const list = _allUsers.filter(u =>
@@ -603,65 +473,79 @@
           const isAdmin = u.role === 'admin';
           return `
           <tr>
-            <td style="color:rgba(255,255,255,0.4);font-size:0.8rem">${u.user_id}</td>
-            <td style="font-weight:700;color:white">${nm}</td>
-            <td style="color:#60a5fa;font-size:0.82rem">${u.email}</td>
+            <td style="color:var(--slate-400);font-size:0.8rem">${u.user_id}</td>
+            <td style="font-weight:600;color:var(--slate-800)">${nm}</td>
+            <td style="color:var(--slate-500);font-size:0.82rem">${u.email}</td>
             <td><span class="role-badge ${u.role}">${u.role}</span></td>
-            <td style="color:rgba(255,255,255,0.35)">—</td>
+            <td style="color:var(--slate-400)">—</td>
             <td>
               ${isAdmin
                 ? `<span class="protected-label">Protected</span>`
-                : `<button class="btn-admin-delete" onclick="deleteUser(${u.user_id},'${nm.replace(/'/g,"\\'")}')">🗑 Delete</button>`}
+                : `<button class="btn-tbl-delete" onclick="deleteUser(${u.user_id},'${nm.replace(/'/g,"\\'")}')">🗑 Delete</button>`}
             </td>
           </tr>`;
         }).join('')
-      : '<tr class="loading-row"><td colspan="6">No users found.</td></tr>';
+      : '<tr class="empty-row"><td colspan="6">No users found.</td></tr>';
   }
 
   async function deleteUser(id, name) {
     if (!confirm(`Delete user "${name}"? This cannot be undone.`)) return;
     try {
-      // No delete endpoint yet — mark as note
-      showToast(`User "${name}" would be deleted (endpoint pending).`, 'info');
-    } catch(e) { showToast('Error deleting user.', 'error'); }
+      const res  = await fetch(`${API}/api/users/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.ok) {
+        showToast(`User "${name}" deleted.`, 'success');
+        _allUsers = _allUsers.filter(u => u.user_id !== id);
+        renderUsers();
+        renderOverview();
+        renderStats();
+      } else {
+        showToast(data.message || 'Delete failed.', 'error');
+      }
+    } catch(e) {
+      showToast('Server offline.', 'error');
+    }
   }
 
-  // ── Listings tab ──────────────────────────────────────────
-  function typeBadgeRow(d, showAddress = true) {
-    const typeKey = (d.dorm_type || '').toLowerCase().includes('boarding') ? 'boarding'
-                  : (d.dorm_type || '').toLowerCase().includes('apart') ? 'apartment'
-                  : 'dormitory';
-    const typeLabel = d.dorm_type || 'Dormitory';
+  // ── Listings tab ────────────────────────────────────────
+  function typeKey(d) {
+    const t = (d.dorm_type || '').toLowerCase();
+    return t.includes('boarding') ? 'boarding' : t.includes('apart') ? 'apartment' : 'dormitory';
+  }
+
+  function listingRow(d, showAddress) {
+    const tk    = typeKey(d);
     const price = d.price_per_month ? `₱${Number(d.price_per_month).toLocaleString()}` : '—';
     const addr  = d.location || '—';
+    const safeName = (d.name || '').replace(/'/g, "\\'");
     if (showAddress) {
       return `
       <tr>
-        <td style="color:rgba(255,255,255,0.4);font-size:0.8rem">${d.dorm_id}</td>
-        <td style="font-weight:700;color:white">${d.name}</td>
-        <td><span class="type-badge ${typeKey}">${typeLabel.toUpperCase()}</span></td>
-        <td style="color:rgba(255,255,255,0.6)">${d.owner_name || '—'}</td>
-        <td style="color:rgba(255,255,255,0.45);font-size:0.8rem;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${addr}</td>
-        <td style="color:white;font-weight:600">${price}</td>
+        <td style="color:var(--slate-400);font-size:0.8rem">${d.dorm_id}</td>
+        <td style="font-weight:600;color:var(--slate-800)">${d.name}</td>
+        <td><span class="type-badge ${tk}">${(d.dorm_type || 'Dormitory').toUpperCase()}</span></td>
+        <td style="color:var(--slate-600)">${d.owner_name || '—'}</td>
+        <td style="color:var(--slate-400);font-size:0.8rem;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${addr}</td>
+        <td style="font-weight:600;color:var(--slate-800)">${price}</td>
         <td>
-          <div style="display:flex;gap:5px">
-            <button class="btn-admin-view" onclick="viewListing(${d.dorm_id})">👁 View</button>
-            <button class="btn-admin-delete" onclick="deleteListing(${d.dorm_id},'${(d.name||'').replace(/'/g,"\\'")}')">🗑 Delete</button>
+          <div style="display:flex;gap:6px">
+            <button class="btn-tbl-view"   onclick="viewListing(${d.dorm_id})">👁 View</button>
+            <button class="btn-tbl-delete" onclick="deleteListing(${d.dorm_id},'${safeName}')">🗑 Delete</button>
           </div>
         </td>
       </tr>`;
     }
     return `
     <tr>
-      <td style="color:rgba(255,255,255,0.4);font-size:0.8rem">${d.dorm_id}</td>
-      <td style="font-weight:700;color:white">${d.name}</td>
-      <td><span class="type-badge ${typeKey}">${typeLabel.toUpperCase()}</span></td>
-      <td style="color:rgba(255,255,255,0.6)">${d.owner_name || '—'}</td>
-      <td style="color:white;font-weight:600">${price}</td>
+      <td style="color:var(--slate-400);font-size:0.8rem">${d.dorm_id}</td>
+      <td style="font-weight:600;color:var(--slate-800)">${d.name}</td>
+      <td><span class="type-badge ${tk}">${(d.dorm_type || 'Dormitory').toUpperCase()}</span></td>
+      <td style="color:var(--slate-600)">${d.owner_name || '—'}</td>
+      <td style="font-weight:600;color:var(--slate-800)">${price}</td>
       <td>
-        <div style="display:flex;gap:5px">
-          <button class="btn-admin-view" onclick="viewListing(${d.dorm_id})">👁 View</button>
-          <button class="btn-admin-delete" onclick="deleteListing(${d.dorm_id},'${(d.name||'').replace(/'/g,"\\'")}')">🗑 Delete</button>
+        <div style="display:flex;gap:6px">
+          <button class="btn-tbl-view"   onclick="viewListing(${d.dorm_id})">👁 View</button>
+          <button class="btn-tbl-delete" onclick="deleteListing(${d.dorm_id},'${safeName}')">🗑 Delete</button>
         </div>
       </td>
     </tr>`;
@@ -670,12 +554,12 @@
   function renderListings() {
     const q    = (document.getElementById('listing-search')?.value || '').toLowerCase();
     const list = _allListings.filter(d =>
-      !q || (d.name||'').toLowerCase().includes(q) || (d.location||'').toLowerCase().includes(q)
+      !q || (d.name || '').toLowerCase().includes(q) || (d.location || '').toLowerCase().includes(q)
     );
     document.getElementById('listings-count').textContent = `(${list.length})`;
     document.getElementById('listings-tbody').innerHTML = list.length
-      ? list.map(d => typeBadgeRow(d, true)).join('')
-      : '<tr class="loading-row"><td colspan="7">No listings found.</td></tr>';
+      ? list.map(d => listingRow(d, true)).join('')
+      : '<tr class="empty-row"><td colspan="7">No listings found.</td></tr>';
   }
 
   function filterListings() { renderListings(); }
@@ -702,15 +586,13 @@
     } catch(e) { showToast('Server offline.', 'error'); }
   }
 
-  function goHome(e) { if(e) e.preventDefault(); window.location.href = 'index.html'; }
-
   function logout() {
     localStorage.removeItem('df_role');
     localStorage.removeItem('df_user');
     window.location.href = 'index.html';
   }
 
-  // ── Boot ──────────────────────────────────────────────────
+  // ── Boot ────────────────────────────────────────────────
   fetchAll();
 </script>
 </body>
