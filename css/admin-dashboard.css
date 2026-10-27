@@ -1,0 +1,128 @@
+﻿
+    /* Only admin-specific extras — everything else uses shared style.css */
+
+    /* Role badges inside tables */
+    .role-badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: var(--r-xs);
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .role-badge.owner   { background: var(--gold-100);    color: var(--gold-600); }
+    .role-badge.student { background: var(--navy-50);     color: var(--navy-700); }
+    .role-badge.renter  { background: #ede9fe;            color: #5b21b6; }
+    .role-badge.admin   { background: var(--success-light); color: var(--success); }
+
+    /* Type badges */
+    .type-badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: var(--r-xs);
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .type-badge.dormitory { background: var(--navy-50);     color: var(--navy-700); }
+    .type-badge.boarding  { background: var(--gold-100);    color: var(--gold-600); }
+    .type-badge.apartment { background: var(--success-light); color: var(--success); }
+
+    /* Admin panel badge in sidebar */
+    .admin-panel-badge {
+      display: inline-block;
+      font-size: 0.58rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(245,158,11,0.18);
+      border: 1px solid rgba(245,158,11,0.32);
+      color: var(--gold-400);
+      padding: 2px 7px;
+      border-radius: 100px;
+    }
+
+    /* Stat cards for admin (uses shared stat-card but needs 4-col grid) */
+    .admin-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 1100px) { .admin-stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px)  { .admin-stats-grid { grid-template-columns: 1fr; } }
+
+    /* Two-column overview grid */
+    .overview-two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 960px) { .overview-two-col { grid-template-columns: 1fr; } }
+
+    /* Search input in page header */
+    .admin-search {
+      padding: 8px 14px;
+      background: var(--white);
+      border: 1.5px solid var(--border-mid);
+      border-radius: var(--r-sm);
+      color: var(--slate-800);
+      font-size: 0.85rem;
+      font-family: var(--font);
+      outline: none;
+      width: 240px;
+      transition: border-color var(--t-fast), box-shadow var(--t-fast);
+    }
+    .admin-search::placeholder { color: var(--slate-400); }
+    .admin-search:focus {
+      border-color: var(--navy-500);
+      box-shadow: var(--focus-ring);
+    }
+
+    /* Action buttons */
+    .btn-tbl-view {
+      padding: 4px 11px;
+      background: var(--navy-50);
+      border: 1px solid var(--navy-100);
+      border-radius: var(--r-xs);
+      color: var(--navy-700);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: background var(--t-fast);
+      white-space: nowrap;
+    }
+    .btn-tbl-view:hover { background: var(--navy-100); }
+
+    .btn-tbl-delete {
+      padding: 4px 11px;
+      background: var(--danger-light);
+      border: 1px solid #fecaca;
+      border-radius: var(--r-xs);
+      color: var(--danger);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: background var(--t-fast);
+      white-space: nowrap;
+    }
+    .btn-tbl-delete:hover { background: #fecaca; }
+
+    .protected-label {
+      font-size: 0.75rem;
+      color: var(--slate-400);
+      font-style: italic;
+    }
+
+    /* Empty / loading rows */
+    .empty-row td {
+      text-align: center;
+      padding: 36px;
+      color: var(--slate-400);
+      font-size: 0.875rem;
+    }
+  

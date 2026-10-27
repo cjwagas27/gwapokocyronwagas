@@ -13,7 +13,7 @@ if ($listen) {
 
 # .kiro is one level below the workspace root.
 $root  = Split-Path -Parent $PSScriptRoot
-$server = Join-Path $root 'server.py'
+$server = Join-Path $root 'backend\server.py'
 
 if (-not (Test-Path $server)) {
     Write-Output "server.py not found at $server - nothing to start."

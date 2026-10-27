@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    DORMFINDER — SHARED JS
    ============================================================ */
 
@@ -226,7 +226,7 @@ const dormListings = [
 // ── Helpers ───────────────────────────────────────────────────
 function selectDorm(id) {
   localStorage.setItem('selectedDormId', id);
-  window.location.href = 'dorm-details.html';
+  window.location.href = '/pages/dorm-details.html';
 }
 
 function formatPeso(n) {

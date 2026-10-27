@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Database — keep the file but ignore WAL/SHM temp files
+database/*.db-shm
+database/*.db-wal
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
+*.swo
+
+# Node (not used, but just in case)
+node_modules/
